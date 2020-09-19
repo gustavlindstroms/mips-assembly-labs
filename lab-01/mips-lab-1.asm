@@ -1,12 +1,12 @@
 ##############################################################################
 #
-#  KURS: 1DT038 2018.  Computer Architecture
+#  KURS: 1DT038 2020.  Computer Architecture
 #	
-# DATUM:
+# DATUM: 2020-09-19
 #
-#  NAMN:			
+#  NAMN:	 Gustav Lindström		
 #
-#  NAMN:
+#  NAMN: Johan Terenius
 #
 ##############################################################################
 
