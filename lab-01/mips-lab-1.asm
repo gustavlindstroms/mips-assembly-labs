@@ -17,7 +17,7 @@ ARRAY_SIZE:
 FIBONACCI_ARRAY:
 	.word	1, 1, 2, 3, 5, 8, 13, 21, 34, 55
 STR_str:
-	.asciiz "Hunden, Katten, Glassen"
+	.asciiz "hej"
 
 	.globl DBG
 	.text
@@ -54,7 +54,10 @@ for_all_in_array:
   	j for_all_in_array 		# next element
 	
 end_for_all:
-	
+	add $t0, $zero, $zero
+	add $t1, $zero, $zero
+	add $t2, $zero, $zero
+	add $t3, $zero, $zero
 	jr	$ra			# Return to caller.
 	
 ##############################################################################
@@ -71,8 +74,13 @@ end_for_all:
 string_length:
 
 	#### Write your solution here ####
-	
-	jr	$ra
+	lb   $a0,0($t0)
+	beqz $a0, done
+   	addi $t0,$t0,1
+    	addi $t1,$t1,1
+    	j string_length
+	done:
+		jr	$ra
 	
 ##############################################################################
 #
@@ -109,7 +117,7 @@ string_for_each:
 to_upper:
 
 	#### Write your solution here ####
-    
+
 	jr	$ra
 
 
