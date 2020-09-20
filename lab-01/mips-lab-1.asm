@@ -41,8 +41,6 @@ DBG:	##### DEBUGG BREAKPOINT ######
 	add	$t0, $zero, $zero	# Initialize array index i to zero.
 	
 for_all_in_array:
-
-	#### Append a MIPS-instruktion before each of these comments
 	
 	beq $t0, $a1, end_for_all 	# Done if i == N
 	add $t1, $t0, $t0		# 2*i
@@ -73,14 +71,15 @@ end_for_all:
 ##############################################################################	
 string_length:
 
-	#### Write your solution here ####
-	lb   $a0,0($t0)
-	beqz $a0, done
-   	addi $t0,$t0,1
-    	addi $t1,$t1,1
+	lb   $a0,0($t0) 			# load char at string location i
+	beqz $a0, done 			# if char at i == null return
+   	addi $t0,$t0,1			# i++
+    	addi $v0,$v0,1			# counter ++
     	j string_length
 	done:
-		jr	$ra
+		add $t0, $zero, $zero	# restore temp register
+		add $t1, $zero, $zero 	#restore temp register
+		jr	$ra		#return
 	
 ##############################################################################
 #
@@ -97,15 +96,24 @@ string_length:
 ##############################################################################	
 string_for_each:
 
-	addi	$sp, $sp, -4		# PUSH return address to caller
-	sw	$ra, 0($sp)
+    addiu $sp, $sp, -12             # move stackpointer down three steps for vaiables
+    sw  $ra, 0($sp)                 # Store ra
+    sw  $a1, 8($sp)                 # Store a1
 
-	#### Write your solution here ####
-	
-	lw	$ra, 0($sp)		# Pop return address to caller
-	addi	$sp, $sp, 4		
+for_each:
+    sw  $a0, 4($sp)                 # Store a0
+    lb  $t0, 0($a0)                 # get char at i
+    beqz $t0, end_for_each    	   # If Char at i == null return 
+    jalr $a1                        # go to subroutine at address a1
+    lw  $a0, 4($sp)                 # Reload a0
+    lw  $a1, 8($sp)                 # reload a1
+    addi $a0, $a0, 1                # i++
+    j   for_each
 
-	jr	$ra
+end_for_each:
+    lw  $ra, 0($sp)                 # reload ra
+    addiu $sp, $sp, 12              # move stackpointer back three steps
+    jr  $ra
 
 ##############################################################################
 #
@@ -116,10 +124,12 @@ string_for_each:
 ##############################################################################		
 to_upper:
 
-	#### Write your solution here ####
-
+	#### Write your solution here ##
+	lb $t0, 0($a0)	        	# load byte at addres of the parameter
+	subi $t0, $t0, 32	# subtract 32 (to get uppcase value of a-z char
+	sb $t0, 0($a0)		# save the now uppercase character
+	add $t0, $zero, $zero	# reset t0
 	jr	$ra
-
 
 ##############################################################################
 #
