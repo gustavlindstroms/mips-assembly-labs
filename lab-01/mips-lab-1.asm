@@ -17,7 +17,7 @@ ARRAY_SIZE:
 FIBONACCI_ARRAY:
 	.word	1, 1, 2, 3, 5, 8, 13, 21, 34, 55
 STR_str:
-	.asciiz "hej"
+	.asciiz "hunden, katten, glassen"
 
 	.globl DBG
 	.text
@@ -70,12 +70,14 @@ end_for_all:
 #
 ##############################################################################	
 string_length:
-
-	lb   $a0,0($t0) 			# load char at string location i
-	beqz $a0, done 			# if char at i == null return
-   	addi $t0,$t0,1			# i++
-    	addi $v0,$v0,1			# counter ++
-    	j string_length
+	add $v0, $zero, $zero
+	for:
+		lb   $a0, 0($t0) 		# load char at string location i
+		beqz $a0, done 			# if char at i == null return
+   		addi $t0,$t0,1			# i++
+    		addi $v0,$v0,1			# counter ++
+    		j for
+	
 	done:
 		add $t0, $zero, $zero	# restore temp register
 		add $t1, $zero, $zero 	#restore temp register
@@ -125,11 +127,19 @@ end_for_each:
 to_upper:
 
 	#### Write your solution here ##
-	lb $t0, 0($a0)	        	# load byte at addres of the parameter
-	subi $t0, $t0, 32	# subtract 32 (to get uppcase value of a-z char
+	lb $t0, 0($a0)	        	# load byte at addres of the para
+	blt $t0, 'a', skip_char 	# Skip char if ASCII value in $T0 is less than 97 
+        	bgt $t0, 'z', skip_char	 	# Skip char if ASCII value in $T0 is more than 122 
+	subi $t0, $t0, 32	# subtract 32 (to get uppcase value of a-z char)
 	sb $t0, 0($a0)		# save the now uppercase character
 	add $t0, $zero, $zero	# reset t0
 	jr	$ra
+	
+	skip_char:
+		add $t0, $zero, $zero	# reset t0
+		jr $ra
+		
+
 
 ##############################################################################
 #
