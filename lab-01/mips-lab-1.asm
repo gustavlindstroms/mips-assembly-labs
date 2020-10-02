@@ -99,17 +99,17 @@ string_length:
 string_for_each:
 
     addiu $sp, $sp, -12             # move stackpointer down three steps for vaiables
-    sw  $ra, 0($sp)                 # Store ra
     sw  $a1, 8($sp)                 # Store a1
+    sw  $ra, 0($sp)                 # Store ra
 
 for_each:
     sw  $a0, 4($sp)                 # Store a0
     lb  $t0, 0($a0)                 # get char at i
-    beqz $t0, end_for_each    	   # If Char at i == null return 
+    beqz $t0, end_for_each    	   # if char at i == null return 
     jalr $a1                        # go to subroutine at address a1
     lw  $a0, 4($sp)                 # Reload a0
-    lw  $a1, 8($sp)                 # reload a1
     addi $a0, $a0, 1                # i++
+    lw  $a1, 8($sp)                 # reload a1
     j   for_each
 
 end_for_each:
