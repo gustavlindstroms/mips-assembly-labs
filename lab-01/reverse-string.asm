@@ -1,7 +1,7 @@
 
 .data
 
-str_memory_space:	.asciiz	"gustav&johan" # should be "nahoj&vatsug" reversed
+str_memory_space:	.asciiz	"gustav&johan" # should be "nahoj&vatsug" reverseds
 
 .text
 .globl main
