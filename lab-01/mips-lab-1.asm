@@ -18,9 +18,14 @@ FIBONACCI_ARRAY:
 	.word	1, 1, 2, 3, 5, 8, 13, 21, 34, 55
 STR_str:
 	.asciiz "hunden, katten, glassen"
+	
+str_memory_space:	.asciiz	"gustav&johan" # should be "nahoj&vatsug" reverseds
+
+string_to_camelcase: .asciiz "aMbUsH"
 
 	.globl DBG
 	.text
+
 j main
 ##############################################################################
 #
@@ -70,18 +75,17 @@ end_for_all:
 #
 ##############################################################################	
 string_length:
-	add $v0, $zero, $zero
-	for:
-		lb   $a0, 0($t0) 		# load char at string location i
-		beqz $a0, done 			# if char at i == null return
-   		addi $t0,$t0,1			# i++
-    		addi $v0,$v0,1			# counter ++
-    		j for
-	
-	done:
-		add $t0, $zero, $zero	# restore temp register
-		add $t1, $zero, $zero 	#restore temp register
-		jr	$ra		#return
+    addi    $v0, $zero, 0           # Initialize Sum to zero.
+
+	string_length_loop:
+    		lb     $t0,($a0)
+    		beqz    $t0, string_length_done
+    		addi    $v0, $v0, 1
+    		addi     $a0, $a0, 1
+    		j string_length_loop
+
+	string_length_done:
+    		jr    $ra
 	
 ##############################################################################
 #
@@ -105,7 +109,7 @@ string_for_each:
 for_each:
     sw  $a0, 4($sp)                 # Store a0
     lb  $t0, 0($a0)                 # get char at i
-    beqz $t0, end_for_each    	   # if char at i == null return 
+    beqz $t0, end_for_each    	    # if char at i == null return 
     jalr $a1                        # go to subroutine at address a1
     lw  $a0, 4($sp)                 # Reload a0
     addi $a0, $a0, 1                # i++
@@ -129,7 +133,7 @@ to_upper:
 	#### Write your solution here ##
 	lb $t0, 0($a0)	        	# load byte at addres of the para
 	blt $t0, 'a', skip_char 	# Skip char if ASCII value in $T0 is less than 97 
-        	bgt $t0, 'z', skip_char	 	# Skip char if ASCII value in $T0 is more than 122 
+        bgt $t0, 'z', skip_char	 	# Skip char if ASCII value in $T0 is more than 122 
 	subi $t0, $t0, 32	# subtract 32 (to get uppcase value of a-z char)
 	sb $t0, 0($a0)		# save the now uppercase character
 	add $t0, $zero, $zero	# reset t0
@@ -140,6 +144,50 @@ to_upper:
 		jr $ra
 		
 
+##############################################################################
+#
+#  DESCRIPTION: Capitalizes every other letter in a string
+#	
+#        INPUT: $a0 - address of a the string
+#
+##############################################################################		
+camelcase:
+	add $t0, $zero, $zero # set i to 0
+	addi $t3, $zero, 1 # set boolean to true
+	add $t0, $a0, $zero
+
+	camelcase_loop:
+		lb $t2, 0($t0) # load first char if string to $t2
+		beqz $t2, camelcase_done #if char == null go to done
+
+		beq $t3, 0, lowercase #if false go to caps
+		beq $t3, 1, caps # if true go to lowercase
+	
+		back: # point to jump back from subroutine
+		sb $t2, 0($t0) # store the modified char
+		addi $t0, $t0, 1 #i++
+		j camelcase_loop # jump to top of loop
+	
+			caps: 
+			blt $t2, '[', caps_done 	# skip char if already uppercase 
+			subi $t2, $t2, 32 # subtract 32 to capitalize
+			j caps_done
+	
+				caps_done:
+				addi $t3, $zero, 0 # boolean = false (next letter should not be capitalized)
+				j back
+	
+			lowercase:
+			bgt $t2, '`', lowercase_done # skip if aready lowercase
+			addi $t2, $t2, 32 #add 32 to make it lowercase
+			j lowercase_done
+	
+				lowercase_done:
+				addi $t3, $zero, 1 #boolean = true
+				j back # jump back to method
+
+	camelcase_done:
+	jr $ra # jump return to main
 
 ##############################################################################
 #
@@ -253,10 +301,68 @@ main:
 	
 	
 	lw	$ra, 0($sp)	# POP return address
-	addi	$sp, $sp, 4	
+	addi	$sp, $sp, 4
 	
-	jr	$ra
+	li	$v0, 4
+	la	$a0, NLNL
+	syscall
+	
+	la	$a0, str_memory_space
+	li	$v0, 4
+	syscall	
 
+	jal	string_length	# JAL to strlen function, saves return address to $ra
+	
+	add $a0, $v0, $zero #load the string length into $a0
+	la $a1, str_memory_space #load the address of the string into $a1
+	jal string_reverse
+	
+	li	$v0, 4
+	la	$a0, NLNL
+	syscall
+	
+	li	$v0, 4
+	la	$a0, str_memory_space
+	syscall
+	
+	la $a0, string_to_camelcase
+	jal camelcase
+	
+	li	$v0, 4
+	la	$a0, string_to_camelcase
+	syscall
+	
+
+	li	$v0, 10			# exit the program
+	syscall
+	
+##############################################################################
+#
+#  DESCRIPTION : Revserses a string
+#		 by double quotes to the console. 
+#
+#        INPUT: $a0 - address to a NUL terminated string.
+#
+##############################################################################
+string_reverse:
+	add $t0, $zero, $zero # t0 will hold our counter (++)
+	add $t1, $a0, $zero # t1 will hold our counter (--)
+	subi $t1, $t1, 1 # make the length zero based
+	add $t2, $zero, $zero # t2 will hold our temp ascii value to be moved front
+	add $t3, $zero, $zero # t3 will hold our temo ascii vaue to be moved back
+	str_reverse_loop:
+
+		bge $t0, $t1, str_reverse_done #if the ++ counter is greater or equal to -- counter
+		lb $t2, str_memory_space($t1) #load the last char
+		lb $t3, str_memory_space($t0) #load the first char
+		sb $t2, str_memory_space($t0) # save the last char in the first char pos
+		sb $t3, str_memory_space($t1) #save the first char in the last char pos
+		addi $t0, $t0, 1 #add 1 to the first index (i + 1)
+		subi $t1, $t1, 1 #subtract one from the second index (string length -1)
+		j str_reverse_loop # jump to top
+	
+str_reverse_done:
+	jr $ra
 ##############################################################################
 #
 #  DESCRIPTION : Prints out 'str = ' followed by the input string surronded

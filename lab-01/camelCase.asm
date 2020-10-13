@@ -1,7 +1,6 @@
 .data
 
 	string: .asciiz "aMbUsH"
-	
 .text
 j main
 
@@ -12,7 +11,7 @@ camelcase:
 	camelcase_loop:
 		lb $t2, string($t0) # load first char if string to $t2
 		beqz $t2, camelcase_done #if char == null go to done
-	
+
 		beq $t3, 0, lowercase #if false go to caps
 		beq $t3, 1, caps # if true go to lowercase
 	
@@ -38,7 +37,7 @@ camelcase:
 				lowercase_done:
 				addi $t3, $zero, 1 #boolean = true
 				j back # jump back to method
-	
+
 	camelcase_done:
 	jr $ra # jump return to main
 	
