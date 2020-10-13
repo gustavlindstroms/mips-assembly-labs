@@ -78,14 +78,14 @@ string_length:
     addi    $v0, $zero, 0           # Initialize Sum to zero.
 
 	string_length_loop:
-    		lb     $t0,($a0)
-    		beqz    $t0, string_length_done
-    		addi    $v0, $v0, 1
-    		addi     $a0, $a0, 1
+    		lb     $t0,($a0) # load char at i
+    		beqz    $t0, string_length_done # if char at i == null go to done
+    		addi    $v0, $v0, 1 # counter++
+    		addi     $a0, $a0, 1 # i++
     		j string_length_loop
 
 	string_length_done:
-    		jr    $ra
+    		jr    $ra #jump return
 	
 ##############################################################################
 #
@@ -315,21 +315,33 @@ main:
 	
 	add $a0, $v0, $zero #load the string length into $a0
 	la $a1, str_memory_space #load the address of the string into $a1
-	jal string_reverse
+	jal string_reverse # JAL to string reverse
 	
 	li	$v0, 4
-	la	$a0, NLNL
+	la	$a0, NLNL # \n for readability
 	syscall
 	
 	li	$v0, 4
-	la	$a0, str_memory_space
+	la	$a0, str_memory_space #print the reversed string
+	syscall
+	
+	li	$v0, 4
+	la	$a0, NLNL # \n for readability
+	syscall
+	
+	li	$v0, 4
+	la	$a0, string_to_camelcase #print the camelcased string
 	syscall
 	
 	la $a0, string_to_camelcase
-	jal camelcase
+	jal camelcase # Run camelcase method
 	
 	li	$v0, 4
-	la	$a0, string_to_camelcase
+	la	$a0, NLNL # \n for readability
+	syscall
+	
+	li	$v0, 4
+	la	$a0, string_to_camelcase #print the camelcased string
 	syscall
 	
 
